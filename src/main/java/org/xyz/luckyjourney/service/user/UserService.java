@@ -21,4 +21,6 @@ public interface UserService extends IService<User> {
     void updateUser(UpdateUserVO updateUserVO,Long userId);
 
     List<User> list(Set<Long> userIds);
+
+    Boolean follows(Long followsId);
 }

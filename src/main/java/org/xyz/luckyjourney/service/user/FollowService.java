@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.stereotype.Service;
 import org.xyz.luckyjourney.entity.user.Follow;
 
-@Service
+
 public interface FollowService extends IService<Follow>{
     /**
      * 获取粉丝数量
@@ -22,4 +22,6 @@ public interface FollowService extends IService<Follow>{
      * @return
      */
     Long getFollowCount(Long userId);
+
+    Boolean follows(Long userId,Long followsId);
 }

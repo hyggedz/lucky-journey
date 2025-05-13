@@ -16,6 +16,7 @@ import org.xyz.luckyjourney.entity.vo.RegisterVO;
 import org.xyz.luckyjourney.entity.vo.UpdateUserVO;
 import org.xyz.luckyjourney.entity.vo.UserVO;
 import org.xyz.luckyjourney.exception.BaseException;
+import org.xyz.luckyjourney.holder.UserHolder;
 import org.xyz.luckyjourney.mapper.user.UserMapper;
 import org.xyz.luckyjourney.service.user.FavoritesService;
 import org.xyz.luckyjourney.service.user.FollowService;
@@ -163,4 +164,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         oldUser.setDefaultFavoritesId(updateUserVO.getDefaultFavoritesId());
     }
 
+    @Override
+    public Boolean follows(Long followsId) {
+        Long userId = UserHolder.get();
+        return followService.follows(userId,followsId);
+    }
 }

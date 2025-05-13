@@ -1,12 +1,29 @@
 package org.xyz.luckyjourney.service.user.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.xyz.luckyjourney.constant.RedisConstant;
 import org.xyz.luckyjourney.entity.user.Follow;
+import org.xyz.luckyjourney.exception.BaseException;
 import org.xyz.luckyjourney.mapper.user.FollowMapper;
 import org.xyz.luckyjourney.service.user.FollowService;
+import org.xyz.luckyjourney.util.RedisCacheUtil;
 
+import java.util.Date;
+
+@Service
 public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> implements FollowService {
+
+    @Autowired
+    private RedisCacheUtil redisCacheUtil;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public Long getFansCount(Long userId) {
@@ -16,5 +33,36 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
     @Override
     public Long getFollowCount(Long userId) {
         return count(new LambdaQueryWrapper<Follow>().eq(Follow::getUserId,userId));
+    }
+
+    @Override
+    public Boolean follows(Long userId, Long followsId) {
+        if(userId.equals(followsId)){
+            throw new BaseException("你不能关注自己");
+        }
+
+        //保存唯一索引，失败则删除
+        Follow follow = new Follow();
+        follow.setUserId(userId);
+        follow.setFollowId(followsId);
+        try {
+            save(follow);
+            final Date date = new Date();
+            //自己关注表增加
+            redisTemplate.opsForZSet().add(RedisConstant.USER_FOLLOW + userId,followsId,date.getTime());
+            //对方粉丝表增加
+            redisTemplate.opsForZSet().add(RedisConstant.USER_FANS + followsId,userId,date.getTime());
+        }catch (Exception e){
+            remove(new LambdaQueryWrapper<Follow>().eq(Follow::getUserId,userId).eq(Follow::getFollowId,followsId));
+
+            //TODO 获取关注者的视频
+            //TODO 删除收件箱的视频
+
+            redisTemplate.opsForZSet().remove(RedisConstant.USER_FOLLOW + userId,followsId);
+            redisTemplate.opsForZSet().remove(RedisConstant.USER_FANS + followsId,userId);
+
+            return false;
+        }
+        return true;
     }
 }

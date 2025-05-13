@@ -36,4 +36,15 @@ public class CustomerController {
         return R.ok().message("修改成功");
     }
 
+    /**
+     * 关注/取关
+     *
+     * @param followId
+     * @return
+     */
+    @PostMapping("/follows/{followId}")
+    public R follows(@PathVariable Long followId){
+        return R.ok().message(userService.follows(followId) ? "已关注" : "已取关");
+    }
+
 }
