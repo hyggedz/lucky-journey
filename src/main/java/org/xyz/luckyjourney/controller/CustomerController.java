@@ -62,4 +62,8 @@ public class CustomerController {
         return R.ok().data(userService.getFollows(userId,basePage));
     }
 
+    @GetMapping("/fans/{userId}")
+    public R getFans(@PathVariable Long userId,BasePage basePage){
+      return R.ok().data(userService.getFans(userId,basePage));
+    };
 }

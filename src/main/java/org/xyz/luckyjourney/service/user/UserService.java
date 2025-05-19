@@ -24,4 +24,6 @@ public interface UserService extends IService<User> {
 
     IPage getFollows(Long userId, BasePage basepage);
 
+    IPage getFans(Long userId,BasePage basePage);
+
 }
