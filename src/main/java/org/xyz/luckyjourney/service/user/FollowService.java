@@ -3,6 +3,9 @@ package org.xyz.luckyjourney.service.user;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.stereotype.Service;
 import org.xyz.luckyjourney.entity.user.Follow;
+import org.xyz.luckyjourney.entity.vo.BasePage;
+
+import java.util.Collection;
 
 
 public interface FollowService extends IService<Follow>{
@@ -24,4 +27,6 @@ public interface FollowService extends IService<Follow>{
     Long getFollowCount(Long userId);
 
     Boolean follows(Long userId,Long followsId);
+
+    Collection<Long> getFollows(Long userId, BasePage basePage);
 }

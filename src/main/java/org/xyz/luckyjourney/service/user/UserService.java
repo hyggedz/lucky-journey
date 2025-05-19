@@ -1,11 +1,9 @@
 package org.xyz.luckyjourney.service.user;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.xyz.luckyjourney.entity.user.User;
-import org.xyz.luckyjourney.entity.vo.FindPWVO;
-import org.xyz.luckyjourney.entity.vo.RegisterVO;
-import org.xyz.luckyjourney.entity.vo.UpdateUserVO;
-import org.xyz.luckyjourney.entity.vo.UserVO;
+import org.xyz.luckyjourney.entity.vo.*;
 
 import java.util.List;
 import java.util.Set;
@@ -23,4 +21,6 @@ public interface UserService extends IService<User> {
     List<User> list(Set<Long> userIds);
 
     Boolean follows(Long followsId);
+
+    IPage getFollows(Long userId, BasePage basepage);
 }

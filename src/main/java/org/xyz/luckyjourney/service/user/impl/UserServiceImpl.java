@@ -2,6 +2,8 @@ package org.xyz.luckyjourney.service.user.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.netty.util.internal.ObjectUtil;
 import org.springframework.beans.BeanUtils;
@@ -11,10 +13,7 @@ import org.springframework.util.ObjectUtils;
 import org.xyz.luckyjourney.constant.RedisConstant;
 import org.xyz.luckyjourney.entity.user.Favorites;
 import org.xyz.luckyjourney.entity.user.User;
-import org.xyz.luckyjourney.entity.vo.FindPWVO;
-import org.xyz.luckyjourney.entity.vo.RegisterVO;
-import org.xyz.luckyjourney.entity.vo.UpdateUserVO;
-import org.xyz.luckyjourney.entity.vo.UserVO;
+import org.xyz.luckyjourney.entity.vo.*;
 import org.xyz.luckyjourney.exception.BaseException;
 import org.xyz.luckyjourney.holder.UserHolder;
 import org.xyz.luckyjourney.mapper.user.UserMapper;
@@ -23,10 +22,7 @@ import org.xyz.luckyjourney.service.user.FollowService;
 import org.xyz.luckyjourney.service.user.UserService;
 import org.xyz.luckyjourney.util.RedisCacheUtil;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
@@ -168,5 +164,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public Boolean follows(Long followsId) {
         Long userId = UserHolder.get();
         return followService.follows(userId,followsId);
+    }
+
+    @Override
+    public Page<User> getFollows(Long userId, BasePage basepage) {
+        Page<User> page = new Page<>();
+
+        //获取followsId
+        final Collection<Long> followsId = followService.getFollows(userId,basepage);
+        if(ObjectUtils.isEmpty(followsId)){
+            return  page;
+        }
+
+        //获取粉丝列表
+        HashSet<Long> fans = new HashSet<>();
+        fans.addAll(followService.getFans(userId,null));
+
+        HashMap<Long,Boolean> map = new HashMap<>();
+        for(Long followId : followsId){
+            map.put(followId,fans.contains(followId));
+        }
+
+        //查询User并且设置字段
+        final ArrayList<User> users = new ArrayList<>();
+        final HashMap<Long,User> userMap = this.getBaseUserInfoToMap(followsId);
+        for(Long followId : followsId){
+            User user = userMap.get(followId);
+            user.setEach(map.get(user.getId()));
+            users.add(user);
+        }
+        page.setRecords(users);
+        page.setTotal(users.size());
+
+        return page;
     }
 }
