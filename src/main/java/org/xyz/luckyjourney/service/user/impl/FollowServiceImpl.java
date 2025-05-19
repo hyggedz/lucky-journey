@@ -91,4 +91,25 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
         }
         return typedTuples.stream().map(t -> Long.parseLong(t.getValue().toString())).collect(Collectors.toList());
     }
+
+    @Override
+    public Collection<Long> getFans(Long userId, BasePage basePage) {
+        if(basePage == null){
+            Set<Object> set = redisCacheUtil.zGet(RedisConstant.USER_FANS + userId);
+            if(set == null){
+                return Collections.EMPTY_SET;
+            }
+            return set.stream().map(o -> Long.valueOf(o.toString())).collect(Collectors.toList());
+        }
+        final Set<ZSetOperations.TypedTuple<Object>> typedTuples = redisCacheUtil.zSetGetByPage(RedisConstant.USER_FANS + userId, basePage.getPage(), basePage.getLimit());
+        //redis崩溃，从db拿
+        if(ObjectUtils.isEmpty(typedTuples)){
+            List<Follow> records = page(basePage.page(), new LambdaQueryWrapper<Follow>().eq(Follow::getFollowId, userId).orderByDesc(Follow::getGmtCreated)).getRecords();
+            if(ObjectUtils.isEmpty(records)){
+                return Collections.EMPTY_LIST;
+            }
+            return records.stream().map(Follow::getUserId).collect(Collectors.toList());
+        }
+        return typedTuples.stream().map(t -> Long.parseLong(t.getValue().toString())).collect(Collectors.toList());
+    }
 }

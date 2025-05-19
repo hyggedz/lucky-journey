@@ -23,4 +23,5 @@ public interface UserService extends IService<User> {
     Boolean follows(Long followsId);
 
     IPage getFollows(Long userId, BasePage basepage);
+
 }

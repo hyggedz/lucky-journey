@@ -6,6 +6,7 @@ import org.xyz.luckyjourney.entity.user.Follow;
 import org.xyz.luckyjourney.entity.vo.BasePage;
 
 import java.util.Collection;
+import java.util.Collections;
 
 
 public interface FollowService extends IService<Follow>{
@@ -29,4 +30,6 @@ public interface FollowService extends IService<Follow>{
     Boolean follows(Long userId,Long followsId);
 
     Collection<Long> getFollows(Long userId, BasePage basePage);
+
+    Collection<Long> getFans(Long userId, BasePage basePage);
 }
