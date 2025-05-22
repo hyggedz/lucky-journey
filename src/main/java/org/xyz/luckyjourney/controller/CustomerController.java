@@ -13,6 +13,7 @@ import org.xyz.luckyjourney.service.user.FavoritesService;
 import org.xyz.luckyjourney.service.user.UserService;
 import org.xyz.luckyjourney.util.R;
 
+import java.util.List;
 import java.util.function.LongFunction;
 
 
@@ -68,10 +69,41 @@ public class CustomerController {
         return R.ok().data(userService.getFollows(userId,basePage));
     }
 
+    /**
+     * 获取粉丝
+     *
+     *
+     * @param userId
+     * @param basePage
+     * @return
+     */
     @GetMapping("/fans/{userId}")
     public R getFans(@PathVariable Long userId,BasePage basePage){
       return R.ok().data(userService.getFans(userId,basePage));
     };
+
+    /**
+     * 获取所有收藏夹
+     *
+     * @return
+     */
+    @GetMapping("/favorites")
+    public R listFavorites(){
+        Long id = UserHolder.get();
+        List<Favorites> favorites = favoritesService.list(new LambdaQueryWrapper<Favorites>().eq(Favorites::getUserId,id));
+        return R.ok().data(favorites);
+    }
+
+    /**
+     * 获取指定收藏夹
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/favorites/{id}")
+    public R getFavorites(@PathVariable Long id){
+        return R.ok().data(favoritesService.getById(id));
+    }
 
     /**
      * 增加/修改收藏夹
@@ -98,6 +130,13 @@ public class CustomerController {
         return R.ok().message(id == null ? "已创建" : "已修改");
     }
 
+    /**
+     * 删除收藏夹
+     *
+     * @author xyz
+     * @param id
+     * @return
+     */
     @DeleteMapping("/favorites/{id}")
     public R  deleteFavorites(@PathVariable Long id){
         favoritesService.remove(id,UserHolder.get());
