@@ -1,12 +1,15 @@
 package org.xyz.luckyjourney.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.xyz.luckyjourney.entity.user.Favorites;
 import org.xyz.luckyjourney.entity.vo.BasePage;
 import org.xyz.luckyjourney.entity.vo.UpdateUserVO;
 import org.xyz.luckyjourney.entity.vo.UserVO;
 import org.xyz.luckyjourney.holder.UserHolder;
+import org.xyz.luckyjourney.service.user.FavoritesService;
 import org.xyz.luckyjourney.service.user.UserService;
 import org.xyz.luckyjourney.util.R;
 
@@ -19,6 +22,9 @@ public class CustomerController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private FavoritesService favoritesService;
 
     @GetMapping("/getInfo/{userId}")
     public R getInfo(@PathVariable  Long userId){
@@ -66,4 +72,35 @@ public class CustomerController {
     public R getFans(@PathVariable Long userId,BasePage basePage){
       return R.ok().data(userService.getFans(userId,basePage));
     };
+
+    /**
+     * 增加/修改收藏夹
+     *
+     * @author xyz
+     * @param favorites
+     * @return
+     */
+    @PostMapping("/favorites")
+    public R saveOrUpdateFavorites(@RequestBody @Validated Favorites favorites){
+        Long userId = UserHolder.get();
+        Long id = favorites.getId();
+        favorites.setUserId(userId);
+
+        final Long count = favoritesService.count(new LambdaQueryWrapper<Favorites>()
+                .eq(Favorites::getName,favorites.getName())
+                .eq(Favorites::getUserId,favorites.getUserId())
+                .ne(Favorites::getId,favorites.getId()));
+
+        if(count == 1){
+            return R.error().message("该收藏夹已经存在");
+        }
+        favoritesService.saveOrUpdate(favorites);
+        return R.ok().message(id == null ? "已创建" : "已修改");
+    }
+
+    @DeleteMapping("/favorites/{id}")
+    public R  deleteFavorites(@PathVariable Long id){
+        favoritesService.remove(id,UserHolder.get());
+        return R.ok().message("已删除");
+    }
 }
