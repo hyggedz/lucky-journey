@@ -1,11 +1,11 @@
 package org.xyz.luckyjourney.service.video.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.xyz.luckyjourney.constant.AuditStatus;
@@ -14,8 +14,10 @@ import org.xyz.luckyjourney.entity.user.User;
 import org.xyz.luckyjourney.entity.video.Video;
 import org.xyz.luckyjourney.entity.vo.BasePage;
 import org.xyz.luckyjourney.entity.vo.UserVO;
+import org.xyz.luckyjourney.exception.BaseException;
 import org.xyz.luckyjourney.mapper.video.VideoMapper;
 import org.xyz.luckyjourney.service.FileService;
+import org.xyz.luckyjourney.service.user.FavoritesService;
 import org.xyz.luckyjourney.service.user.UserService;
 import org.xyz.luckyjourney.service.video.VideoService;
 
@@ -31,6 +33,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private FavoritesService favoritesService;
 
     @Override
     public IPage<Video> listByUserIdOpenVideo(Long userId, BasePage basePage) {
@@ -49,6 +54,21 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         //enrich 视频信息
         setUserVOAndUrl(videos);
         return page;
+    }
+
+    @Override
+    public boolean favoritesVideo(Long fid, Long vid) {
+        Video video = getById(vid);
+        if(video == null){
+            throw  new BaseException("视频不存在");
+        }
+
+        boolean favorites =  favoritesService.favoritesVideo(fid,vid);
+        updateFavorites(video,favorites ? 1L : -1L);
+
+        //TODO 标签生成，更改推流
+
+        return favorites;
     }
 
     /**
@@ -84,5 +104,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
                 video.setVideoType(file.getFormat());
             }
         }
+    }
+
+    void updateFavorites(Video video,Long value){
+        UpdateWrapper<Video> favoritesUpdateWrapper = new UpdateWrapper<>();
+        favoritesUpdateWrapper.setSql("favorites_count = favorites_count + " + value);
+        favoritesUpdateWrapper.lambda().eq(Video::getId,video.getId()).eq(Video::getFavoritesCount,video.getFavoritesCount());
+        update(video,favoritesUpdateWrapper);
     }
 }

@@ -9,4 +9,6 @@ import org.xyz.luckyjourney.entity.vo.BasePage;
 
 public interface VideoService extends IService<Video> {
     IPage<Video> listByUserIdOpenVideo(Long userId, BasePage basePage);
+
+    boolean favoritesVideo(Long fid, Long vid);
 }

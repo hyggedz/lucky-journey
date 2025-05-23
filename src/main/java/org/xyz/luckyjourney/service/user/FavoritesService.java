@@ -7,4 +7,6 @@ public interface FavoritesService extends IService<Favorites> {
     void exist(Long userId,Long defaultFavoritesId);
 
     void remove(Long id, Long userId);
+
+    boolean favoritesVideo(Long fid,Long vid);
 }

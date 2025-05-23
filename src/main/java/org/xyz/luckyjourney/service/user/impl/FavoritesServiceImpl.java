@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.xyz.luckyjourney.entity.user.Favorites;
 import org.xyz.luckyjourney.entity.user.FavoritesVideo;
+import org.xyz.luckyjourney.entity.user.User;
 import org.xyz.luckyjourney.exception.BaseException;
+import org.xyz.luckyjourney.holder.UserHolder;
 import org.xyz.luckyjourney.mapper.user.FavoritesMapper;
 import org.xyz.luckyjourney.service.user.FavoritesService;
 import org.xyz.luckyjourney.service.user.FavoritesVideoService;
@@ -40,5 +42,24 @@ public class FavoritesServiceImpl extends ServiceImpl<FavoritesMapper, Favorites
         }else {
             throw new BaseException("不能删除别人的收藏夹");
         }
+    }
+
+    @Override
+    public boolean favoritesVideo(Long fid, Long vid) {
+        Long userId = UserHolder.get();
+        try{
+            FavoritesVideo favoritesVideo = new FavoritesVideo();
+            favoritesVideo.setFavoritesId(fid);
+            favoritesVideo.setUserId(userId);
+            favoritesVideo.setVideoId(vid);
+            favoritesVideoService.save(favoritesVideo);
+        }catch (Exception e){
+            favoritesVideoService.remove(new LambdaQueryWrapper<FavoritesVideo>()
+                    .eq(FavoritesVideo::getFavoritesId,fid)
+                    .eq(FavoritesVideo::getUserId,userId)
+                    .eq(FavoritesVideo::getVideoId,vid));
+            return false;
+        }
+        return true;
     }
 }
