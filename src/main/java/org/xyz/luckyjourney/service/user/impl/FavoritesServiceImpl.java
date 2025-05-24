@@ -14,6 +14,11 @@ import org.xyz.luckyjourney.mapper.user.FavoritesMapper;
 import org.xyz.luckyjourney.service.user.FavoritesService;
 import org.xyz.luckyjourney.service.user.FavoritesVideoService;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class FavoritesServiceImpl extends ServiceImpl<FavoritesMapper, Favorites> implements FavoritesService {
 
@@ -61,5 +66,18 @@ public class FavoritesServiceImpl extends ServiceImpl<FavoritesMapper, Favorites
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Collection<Long> listByFavoritesId(Long favoritesId,Long userId) {
+        Favorites favorites = getOne(new LambdaQueryWrapper<Favorites>().eq(Favorites::getUserId, userId).eq(Favorites::getId, favoritesId));
+        if(favorites == null){
+            throw new BaseException("收藏夹不存在");
+        }
+
+        List<Long> collect = favoritesVideoService.list(new LambdaQueryWrapper<FavoritesVideo>().eq(FavoritesVideo::getFavoritesId, favoritesId))
+                .stream().map(FavoritesVideo::getVideoId).collect(Collectors.toList());
+
+        return collect;
     }
 }

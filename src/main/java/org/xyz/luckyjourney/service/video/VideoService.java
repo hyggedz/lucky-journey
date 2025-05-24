@@ -6,9 +6,13 @@ import org.springframework.stereotype.Service;
 import org.xyz.luckyjourney.entity.video.Video;
 import org.xyz.luckyjourney.entity.vo.BasePage;
 
+import java.util.Collection;
+
 
 public interface VideoService extends IService<Video> {
     IPage<Video> listByUserIdOpenVideo(Long userId, BasePage basePage);
 
     boolean favoritesVideo(Long fid, Long vid);
+
+    Collection<Video> listByFavoritesId(Long favoritesId);
 }

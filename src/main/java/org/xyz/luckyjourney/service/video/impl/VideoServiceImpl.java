@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import jdk.nashorn.internal.runtime.regexp.joni.Option;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -15,6 +16,7 @@ import org.xyz.luckyjourney.entity.video.Video;
 import org.xyz.luckyjourney.entity.vo.BasePage;
 import org.xyz.luckyjourney.entity.vo.UserVO;
 import org.xyz.luckyjourney.exception.BaseException;
+import org.xyz.luckyjourney.holder.UserHolder;
 import org.xyz.luckyjourney.mapper.video.VideoMapper;
 import org.xyz.luckyjourney.service.FileService;
 import org.xyz.luckyjourney.service.user.FavoritesService;
@@ -36,6 +38,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Autowired
     private FavoritesService favoritesService;
+    private VideoService videoService;
 
     @Override
     public IPage<Video> listByUserIdOpenVideo(Long userId, BasePage basePage) {
@@ -69,6 +72,21 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         //TODO 标签生成，更改推流
 
         return favorites;
+    }
+
+    @Override
+    public Collection<Video> listByFavoritesId(Long favoritesId) {
+        //获取视频id
+        List<Long> videoIds = favoritesService.listByFavoritesId(favoritesId, UserHolder.get());
+        if(ObjectUtils.isEmpty(videoIds)){
+            return Collections.EMPTY_LIST;
+        }
+
+        //获取视频
+        List<Video> videos = videoService.listByIds(videoIds);
+        //填充信息
+        setUserVOAndUrl(videos);
+        return videos;
     }
 
     /**
