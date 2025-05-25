@@ -14,13 +14,18 @@ import org.springframework.util.ObjectUtils;
 import org.xyz.luckyjourney.constant.RedisConstant;
 import org.xyz.luckyjourney.entity.user.Favorites;
 import org.xyz.luckyjourney.entity.user.User;
+import org.xyz.luckyjourney.entity.user.UserSubscribe;
+import org.xyz.luckyjourney.entity.video.Type;
 import org.xyz.luckyjourney.entity.vo.*;
 import org.xyz.luckyjourney.exception.BaseException;
 import org.xyz.luckyjourney.holder.UserHolder;
 import org.xyz.luckyjourney.mapper.user.UserMapper;
+import org.xyz.luckyjourney.service.InterestPushService;
 import org.xyz.luckyjourney.service.user.FavoritesService;
 import org.xyz.luckyjourney.service.user.FollowService;
 import org.xyz.luckyjourney.service.user.UserService;
+import org.xyz.luckyjourney.service.user.UserSubscribeService;
+import org.xyz.luckyjourney.service.video.TypeService;
 import org.xyz.luckyjourney.util.RedisCacheUtil;
 
 import java.util.*;
@@ -38,6 +43,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private FollowService followService;
+
+    @Autowired
+    private TypeService typeService;
+
+    @Autowired
+    private UserSubscribeService userSubscribeService;
+
+    @Autowired
+    private InterestPushService interestPushService;
 
     @Override
     public UserVO getInfo(Long userId) {
@@ -236,11 +250,49 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return page;
     }
 
-    Map<Long,User> getBaseUserInfoToMap(Collection<Long> ids){
+    @Override
+    public void subscribe(Set<Long> typeIds) {
+        if(ObjectUtils.isEmpty(typeIds)){
+          return;
+        }
+        List<Type> types = typeService.listByIds(typeIds);
+        if(types.size() != typeIds.size()){
+            throw new BaseException("分类不存在");
+        }
+
+        Long userId = UserHolder.get();
+        ArrayList<UserSubscribe> userSubscribes = new ArrayList<>();
+        for(Long typeId : typeIds){
+            UserSubscribe userSubscribe = new UserSubscribe();
+            userSubscribe.setTypeId(typeId);
+            userSubscribe.setUserId(userId);
+            userSubscribes.add(userSubscribe);
+        }
+
+        userSubscribeService.remove(new LambdaQueryWrapper<UserSubscribe>().eq(UserSubscribe::getUserId,userId));
+        userSubscribeService.saveBatch(userSubscribes);
+
+        final ModelVO modelVO = new ModelVO();
+
+        modelVO.setUserId(userId);
+        List<String> labels = new ArrayList<>();
+        for(Type type : types){
+            labels.addAll(type.buildLabel());
+        }
+
+        modelVO.setLabels(labels);
+        initModel(modelVO);
+    }
+
+    private Map<Long,User> getBaseUserInfoToMap(Collection<Long> ids){
         List<User> users = new ArrayList<>();
         users  = list(new LambdaQueryWrapper<User>().in(User::getId,ids)
                 .select(User::getId,User::getNickName,User::getSex,User::getAvatar,User::getDescription)
         );
         return users.stream().collect(Collectors.toMap(User::getId, Function.identity()));
+    }
+
+    public void initModel(ModelVO modelVO){
+        interestPushService.initUserModel(modelVO.getUserId(),modelVO.getLabels());
     }
 }

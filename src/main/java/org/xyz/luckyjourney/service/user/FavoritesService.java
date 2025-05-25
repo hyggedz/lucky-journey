@@ -3,7 +3,6 @@ package org.xyz.luckyjourney.service.user;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.xyz.luckyjourney.entity.user.Favorites;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface FavoritesService extends IService<Favorites> {
@@ -13,5 +12,5 @@ public interface FavoritesService extends IService<Favorites> {
 
     boolean favoritesVideo(Long fid,Long vid);
 
-    Collection<Long>  listByFavoritesId(Long favoritesId,Long userId);
+    List<Long>  listByFavoritesId(Long favoritesId,Long userId);
 }

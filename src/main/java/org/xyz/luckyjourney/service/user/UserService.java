@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.xyz.luckyjourney.entity.user.User;
 import org.xyz.luckyjourney.entity.vo.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -26,4 +27,5 @@ public interface UserService extends IService<User> {
 
     IPage getFans(Long userId,BasePage basePage);
 
+    void subscribe(Set<Long> typeIds);
 }

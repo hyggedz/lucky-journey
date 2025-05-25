@@ -84,6 +84,7 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
         //获取视频
         List<Video> videos = videoService.listByIds(videoIds);
+
         //填充信息
         setUserVOAndUrl(videos);
         return videos;

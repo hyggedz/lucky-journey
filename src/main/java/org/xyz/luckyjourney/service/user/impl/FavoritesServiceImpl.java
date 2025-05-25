@@ -7,15 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.xyz.luckyjourney.entity.user.Favorites;
 import org.xyz.luckyjourney.entity.user.FavoritesVideo;
-import org.xyz.luckyjourney.entity.user.User;
 import org.xyz.luckyjourney.exception.BaseException;
 import org.xyz.luckyjourney.holder.UserHolder;
 import org.xyz.luckyjourney.mapper.user.FavoritesMapper;
 import org.xyz.luckyjourney.service.user.FavoritesService;
 import org.xyz.luckyjourney.service.user.FavoritesVideoService;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,7 +66,7 @@ public class FavoritesServiceImpl extends ServiceImpl<FavoritesMapper, Favorites
     }
 
     @Override
-    public Collection<Long> listByFavoritesId(Long favoritesId,Long userId) {
+    public List<Long> listByFavoritesId(Long favoritesId, Long userId) {
         Favorites favorites = getOne(new LambdaQueryWrapper<Favorites>().eq(Favorites::getUserId, userId).eq(Favorites::getId, favoritesId));
         if(favorites == null){
             throw new BaseException("收藏夹不存在");

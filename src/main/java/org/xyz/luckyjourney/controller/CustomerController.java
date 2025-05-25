@@ -2,6 +2,7 @@ package org.xyz.luckyjourney.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.xyz.luckyjourney.entity.user.Favorites;
@@ -13,6 +14,7 @@ import org.xyz.luckyjourney.service.user.FavoritesService;
 import org.xyz.luckyjourney.service.user.UserService;
 import org.xyz.luckyjourney.util.R;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.LongFunction;
 
@@ -133,7 +135,6 @@ public class CustomerController {
     /**
      * 删除收藏夹
      *
-     * @author xyz
      * @param id
      * @return
      */
@@ -141,5 +142,23 @@ public class CustomerController {
     public R  deleteFavorites(@PathVariable Long id){
         favoritesService.remove(id,UserHolder.get());
         return R.ok().message("已删除");
+    }
+
+    @PostMapping("/subscribe")
+    public R subscribe(@RequestParam(required = false) String types){
+        HashSet<Long> hashSet = new HashSet<>();
+        String msg = "订阅失败";
+
+        if(!ObjectUtils.isEmpty(types)){
+            String[] splits = types.split(",");
+            for(String s : splits){
+                long l = Long.parseLong(s);
+                hashSet.add(l);
+            }
+            msg = "已订阅";
+        }
+
+        userService.subscribe(hashSet);
+        return R.ok().message(msg);
     }
 }
