@@ -144,6 +144,12 @@ public class CustomerController {
         return R.ok().message("已删除");
     }
 
+    /**
+     *  订阅分类
+     *
+     * @param types
+     * @return
+     */
     @PostMapping("/subscribe")
     public R subscribe(@RequestParam(required = false) String types){
         HashSet<Long> hashSet = new HashSet<>();
@@ -160,5 +166,15 @@ public class CustomerController {
 
         userService.subscribe(hashSet);
         return R.ok().message(msg);
+    }
+
+    @GetMapping("/subscribe")
+    public R listSubscribeType(){
+        return R.ok().data(userService.listSubscribeType(UserHolder.get()));
+    }
+
+    @GetMapping("/noSubscribe")
+    public R listNoSubscribe(){
+        return R.ok().data(userService.listNoSubscribe(UserHolder.get()));
     }
 }

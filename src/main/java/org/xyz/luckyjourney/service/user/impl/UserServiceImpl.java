@@ -1,12 +1,9 @@
 package org.xyz.luckyjourney.service.user.impl;
 
-import com.baomidou.mybatisplus.core.conditions.interfaces.Func;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.sun.deploy.security.MozillaMyKeyStore;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -282,6 +279,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         modelVO.setLabels(labels);
         initModel(modelVO);
+    }
+
+    @Override
+    public List<Type> listSubscribeType(Long userId) {
+        final List<Long> typeIds = userSubscribeService.list(new LambdaQueryWrapper<UserSubscribe>()
+                .eq(UserSubscribe::getUserId, userId))
+                .stream().map(UserSubscribe::getTypeId)
+                .collect(Collectors.toList());
+
+        final List<Type> types = typeService.list(new LambdaQueryWrapper<Type>()
+                .in(Type::getId, typeIds).select(Type::getId, Type::getName, Type::getIcon));
+        return types;
+    }
+
+    @Override
+    public List<Type> listNoSubscribe(Long userId) {
+        List<Type> list = typeService.list(null);
+        List<Type> types = listSubscribeType(userId);
+
+        List<Type> res = new ArrayList<>();
+        for(Type type : list){
+            if(!types.contains(type)){
+                res.add(type);
+            }
+        }
+        return res;
     }
 
     private Map<Long,User> getBaseUserInfoToMap(Collection<Long> ids){
