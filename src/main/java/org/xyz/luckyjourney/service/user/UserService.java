@@ -32,4 +32,6 @@ public interface UserService extends IService<User> {
     List<Type> listSubscribeType(Long userId);
 
     List<Type> listNoSubscribe(Long userId);
+
+    void updateUserModel(UserModel userModel);
 }

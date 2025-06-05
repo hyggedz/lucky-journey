@@ -181,7 +181,7 @@ public class RedisCacheUtil {
      * @param map
      * @return
      */
-    public Boolean hmset(String key,Map<String,Object> map){
+    public Boolean hmset(String key,Map<Object,Object> map){
         try {
             redisTemplate.opsForHash().putAll(key,map);
             return true;

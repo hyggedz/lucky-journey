@@ -307,6 +307,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return res;
     }
 
+    @Override
+    public void updateUserModel(UserModel userModel) {
+        interestPushService.updateUserModel(userModel);
+    }
+
     private Map<Long,User> getBaseUserInfoToMap(Collection<Long> ids){
         List<User> users = new ArrayList<>();
         users  = list(new LambdaQueryWrapper<User>().in(User::getId,ids)

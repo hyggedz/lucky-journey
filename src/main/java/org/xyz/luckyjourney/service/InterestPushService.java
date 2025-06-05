@@ -1,10 +1,13 @@
 package org.xyz.luckyjourney.service;
 
 import org.springframework.stereotype.Service;
+import org.xyz.luckyjourney.entity.vo.UserModel;
 
 import java.util.List;
 
 
 public interface InterestPushService {
     void initUserModel(Long userId, List<String> labels);
+
+    void updateUserModel(UserModel userModel);
 }

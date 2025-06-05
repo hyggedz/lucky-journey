@@ -6,14 +6,13 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.xyz.luckyjourney.entity.user.Favorites;
-import org.xyz.luckyjourney.entity.vo.BasePage;
-import org.xyz.luckyjourney.entity.vo.UpdateUserVO;
-import org.xyz.luckyjourney.entity.vo.UserVO;
+import org.xyz.luckyjourney.entity.vo.*;
 import org.xyz.luckyjourney.holder.UserHolder;
 import org.xyz.luckyjourney.service.user.FavoritesService;
 import org.xyz.luckyjourney.service.user.UserService;
 import org.xyz.luckyjourney.util.R;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.LongFunction;
@@ -176,5 +175,17 @@ public class CustomerController {
     @GetMapping("/noSubscribe")
     public R listNoSubscribe(){
         return R.ok().data(userService.listNoSubscribe(UserHolder.get()));
+    }
+
+    @PostMapping("/updateUserModel")
+    public R updateUserModel(@RequestBody Model model){
+        Double score = model.getScore();
+        if(score == -0.5 || score == 1.0){
+            UserModel userModel = new UserModel();
+            userModel.setUserId(UserHolder.get());
+            userModel.setModels(Collections.singletonList(model));
+            userService.updateUserModel(userModel);
+        }
+        return R.ok();
     }
 }
