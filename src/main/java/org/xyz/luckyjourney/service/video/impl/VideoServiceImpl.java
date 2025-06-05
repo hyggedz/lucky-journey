@@ -13,15 +13,19 @@ import org.xyz.luckyjourney.constant.AuditStatus;
 import org.xyz.luckyjourney.entity.File;
 import org.xyz.luckyjourney.entity.user.User;
 import org.xyz.luckyjourney.entity.video.Video;
+import org.xyz.luckyjourney.entity.video.VideoStar;
 import org.xyz.luckyjourney.entity.vo.BasePage;
+import org.xyz.luckyjourney.entity.vo.UserModel;
 import org.xyz.luckyjourney.entity.vo.UserVO;
 import org.xyz.luckyjourney.exception.BaseException;
 import org.xyz.luckyjourney.holder.UserHolder;
 import org.xyz.luckyjourney.mapper.video.VideoMapper;
 import org.xyz.luckyjourney.service.FileService;
+import org.xyz.luckyjourney.service.InterestPushService;
 import org.xyz.luckyjourney.service.user.FavoritesService;
 import org.xyz.luckyjourney.service.user.UserService;
 import org.xyz.luckyjourney.service.video.VideoService;
+import org.xyz.luckyjourney.service.video.VideoStarService;
 
 import java.util.*;
 import java.util.function.Function;
@@ -38,7 +42,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Autowired
     private FavoritesService favoritesService;
-    private VideoService videoService;
+
+    @Autowired
+    private VideoStarService videoStarService;
+
+    @Autowired
+    private InterestPushService interestPushService;
 
     @Override
     public IPage<Video> listByUserIdOpenVideo(Long userId, BasePage basePage) {
@@ -83,11 +92,32 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         }
 
         //获取视频
-        List<Video> videos = videoService.listByIds(videoIds);
+        List<Video> videos = this.listByIds(videoIds);
 
         //填充信息
         setUserVOAndUrl(videos);
         return videos;
+    }
+
+    @Override
+    public boolean starVideo(Long id) {
+        Video video = getById(id);
+        if(video == null){
+            throw  new BaseException("视频不存在");
+        }
+
+        VideoStar videoStar = new VideoStar();
+        videoStar.setVideoId(id);
+        videoStar.setUserId(UserHolder.get());
+
+        boolean result = videoStarService.starVideo(videoStar);
+        updateStar(video,result ? 1L : -1L);
+
+        List<String> labels = video.buildLabel();
+        UserModel userModel = UserModel.buildUserModel(labels,video.getId(),1.0);
+        interestPushService.updateUserModel(userModel);
+
+        return result;
     }
 
     /**
@@ -130,5 +160,12 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         favoritesUpdateWrapper.setSql("favorites_count = favorites_count + " + value);
         favoritesUpdateWrapper.lambda().eq(Video::getId,video.getId()).eq(Video::getFavoritesCount,video.getFavoritesCount());
         update(video,favoritesUpdateWrapper);
+    }
+
+    void updateStar(Video video,Long value){
+        UpdateWrapper<Video> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.setSql("star_count = star_count + " + value);
+        updateWrapper.lambda().eq(Video::getId,video.getId()).eq(Video::getStartCount,video.getShareCount());
+        update(video,updateWrapper);
     }
 }

@@ -15,4 +15,6 @@ public interface VideoService extends IService<Video> {
     boolean favoritesVideo(Long fid, Long vid);
 
     Collection<Video> listByFavoritesId(Long favoritesId);
+
+    boolean starVideo(Long id);
 }

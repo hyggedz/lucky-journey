@@ -30,4 +30,13 @@ public class VideoController {
     public R listByFavoritesId(@PathVariable Long fid){
         return R.ok().data(videoService.listByFavoritesId(fid));
     }
+
+    @PostMapping("/star/{id}")
+    public R starVideo(@PathVariable Long id){
+        String msg = "点赞成功";
+        if(!videoService.starVideo(id)){
+            msg = "已取消";
+        }
+        return R.ok().message(msg);
+    }
 }
