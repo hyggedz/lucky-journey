@@ -44,6 +44,9 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
     private FavoritesService favoritesService;
 
     @Autowired
+    private VideoService videoService;
+
+    @Autowired
     private VideoStarService videoStarService;
 
     @Autowired
@@ -118,6 +121,33 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         interestPushService.updateUserModel(userModel);
 
         return result;
+    }
+
+    @Override
+    public List<Video> pushVideos(Long userId) {
+        User user = null;
+        if(userId != null){
+            user = userService.getById(userId);
+        }
+
+        Collection<Long> videoIds = interestPushService.listVideoIdByUserModel(user);
+        List<Video> videos = new ArrayList<>();
+
+        if(ObjectUtils.isEmpty(videoIds)){
+            LambdaQueryWrapper<Video> videoLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            videoLambdaQueryWrapper.select(Video::getId);
+            videoLambdaQueryWrapper.orderByDesc(Video::getGmtCreated);
+            videoLambdaQueryWrapper.last("LIMIT 10");
+            List<Object> list = listObjs(videoLambdaQueryWrapper);
+
+            videoIds =  list.stream()
+                            .map(obj -> Long.parseLong(String.valueOf(obj)))
+                            .collect(Collectors.toList());
+        }
+
+        videos = videoService.listByIds(videoIds);
+        setUserVOAndUrl(videos);
+        return videos;
     }
 
     /**

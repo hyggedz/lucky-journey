@@ -14,4 +14,8 @@ public interface RedisConstant {
     String USER_FANS = "user:fans";
 
     String USER_MODEL = "user:model:";
+
+    String SYSTEM_STOCK = "system:stock";
+
+    String HISTORY_VIDEO = "history:video";
 }

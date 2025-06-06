@@ -16,6 +16,12 @@ public class IndexController {
     @Autowired
     private VideoService videoService;
 
+    @GetMapping("/pushVideos")
+    public R pushVideos(HttpServletRequest request){
+        Long userId = JwtUtil.getUserId(request);
+        return R.ok().data(videoService.pushVideos(userId));
+    }
+
     @GetMapping("video/user/{userId}")
     public R listVideoByUserId(@PathVariable Long userId,
                                BasePage basePage, HttpServletRequest request){
