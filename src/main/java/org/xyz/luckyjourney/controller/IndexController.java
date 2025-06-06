@@ -28,4 +28,9 @@ public class IndexController {
         userId = userId == null ? JwtUtil.getUserId(request) : userId;
         return R.ok().data(videoService.listByUserIdOpenVideo(userId,basePage));
     }
+
+    @GetMapping("/video/type/{typeId}")
+    public R getVideoByTypeId(@PathVariable Long typeId){
+        return R.ok().data(videoService.getVideoByTypeId(typeId));
+    }
 }

@@ -12,6 +12,7 @@ import org.springframework.util.ObjectUtils;
 import org.xyz.luckyjourney.constant.AuditStatus;
 import org.xyz.luckyjourney.entity.File;
 import org.xyz.luckyjourney.entity.user.User;
+import org.xyz.luckyjourney.entity.video.Type;
 import org.xyz.luckyjourney.entity.video.Video;
 import org.xyz.luckyjourney.entity.video.VideoStar;
 import org.xyz.luckyjourney.entity.vo.BasePage;
@@ -24,6 +25,7 @@ import org.xyz.luckyjourney.service.FileService;
 import org.xyz.luckyjourney.service.InterestPushService;
 import org.xyz.luckyjourney.service.user.FavoritesService;
 import org.xyz.luckyjourney.service.user.UserService;
+import org.xyz.luckyjourney.service.video.TypeService;
 import org.xyz.luckyjourney.service.video.VideoService;
 import org.xyz.luckyjourney.service.video.VideoStarService;
 
@@ -51,6 +53,8 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
     @Autowired
     private InterestPushService interestPushService;
+    @Autowired
+    private TypeService typeService;
 
     @Override
     public IPage<Video> listByUserIdOpenVideo(Long userId, BasePage basePage) {
@@ -147,6 +151,21 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
 
         videos = videoService.listByIds(videoIds);
         setUserVOAndUrl(videos);
+        return videos;
+    }
+
+    @Override
+    public Collection<Video> getVideoByTypeId(Long typeId) {
+        if(typeId == null) return Collections.EMPTY_LIST;
+        Type type = typeService.getById(typeId);
+        if(type == null) return Collections.EMPTY_LIST;
+
+        Collection<Long> videoIds = interestPushService.listVideoIdByTypeId(typeId);
+        if(ObjectUtils.isEmpty(videoIds)) return Collections.EMPTY_LIST;
+
+        List<Video> videos = videoService.listByIds(videoIds);
+        setUserVOAndUrl(videos);
+
         return videos;
     }
 

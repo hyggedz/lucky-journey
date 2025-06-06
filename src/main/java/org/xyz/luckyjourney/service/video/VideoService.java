@@ -19,4 +19,6 @@ public interface VideoService extends IService<Video> {
     boolean starVideo(Long id);
 
     Collection<Video> pushVideos(Long userId);
+
+    Collection<Video> getVideoByTypeId(Long typeId);
 }

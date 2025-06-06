@@ -18,4 +18,6 @@ public interface RedisConstant {
     String SYSTEM_STOCK = "system:stock";
 
     String HISTORY_VIDEO = "history:video";
+
+    String SYSTEM_TYPE_STOCK = "system:type:stock";
 }

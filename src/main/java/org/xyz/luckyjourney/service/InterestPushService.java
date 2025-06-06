@@ -5,6 +5,7 @@ import org.xyz.luckyjourney.entity.user.User;
 import org.xyz.luckyjourney.entity.vo.UserModel;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -14,4 +15,6 @@ public interface InterestPushService {
     void updateUserModel(UserModel userModel);
 
     Collection<Long> listVideoIdByUserModel(User user);
+
+    Collection<Long> listVideoIdByTypeId(Long typeId);
 }

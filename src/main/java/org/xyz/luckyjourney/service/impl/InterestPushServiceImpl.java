@@ -171,6 +171,22 @@ public class InterestPushServiceImpl implements InterestPushService {
         return videoIds;
     }
 
+    @Override
+    public Collection<Long> listVideoIdByTypeId(Long typeId) {
+        List<Object> list = redisTemplate.opsForSet().randomMembers(RedisConstant.SYSTEM_TYPE_STOCK + typeId, 12);
+        HashSet<Long> res = new HashSet<>();
+
+        if(!ObjectUtils.isEmpty(list)){
+            for (Object o : list){
+                if(!ObjectUtils.isEmpty(o)){
+                    res.add(Long.parseLong(o.toString()));
+                }
+            }
+        }
+
+        return res;
+    }
+
     // 初始化概率数组 -> 存储的是标签 : [游戏，游戏，宠物，花朵]
     public  String [] initProbabilityArray(Map<Object,Object> modelMap){
         Map<String,Integer> probabilityMap = new HashMap<>();
