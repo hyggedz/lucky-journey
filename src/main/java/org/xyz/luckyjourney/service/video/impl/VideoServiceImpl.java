@@ -169,6 +169,29 @@ public class VideoServiceImpl extends ServiceImpl<VideoMapper, Video> implements
         return videos;
     }
 
+    @Override
+    public Collection<Video> listSimiliarVideo(Video video) {
+        if(ObjectUtils.isEmpty(video) || ObjectUtils.isEmpty(video.getLabelNames())){
+            return Collections.EMPTY_LIST;
+        }
+
+        List<String> labels = video.buildLabel();
+        List<String> labelNames = new ArrayList<>();
+        labelNames.addAll(labels);
+        labelNames.addAll(labels);
+
+        Set<Long> videoIds = (Set<Long>) interestPushService.listVideoIdByLabes(labelNames);
+
+        Collection<Video> videos = new ArrayList<>();
+
+        videoIds.remove(video.getId());
+        if(!ObjectUtils.isEmpty(videoIds)){
+            videos = listByIds(videoIds);
+            setUserVOAndUrl(videos);
+        }
+
+    }
+
     /**
      * 根据id （userId,urlId,coverId） 填充用户信息和文件信息
      *

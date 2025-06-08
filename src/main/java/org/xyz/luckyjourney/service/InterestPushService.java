@@ -1,11 +1,9 @@
 package org.xyz.luckyjourney.service;
 
-import org.springframework.stereotype.Service;
 import org.xyz.luckyjourney.entity.user.User;
 import org.xyz.luckyjourney.entity.vo.UserModel;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -17,4 +15,6 @@ public interface InterestPushService {
     Collection<Long> listVideoIdByUserModel(User user);
 
     Collection<Long> listVideoIdByTypeId(Long typeId);
+
+    Collection<Long> listVideoIdByLabes(Collection<String> labelNames);
 }

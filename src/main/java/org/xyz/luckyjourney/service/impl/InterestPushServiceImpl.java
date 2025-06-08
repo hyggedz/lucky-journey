@@ -187,6 +187,20 @@ public class InterestPushServiceImpl implements InterestPushService {
         return res;
     }
 
+    @Override
+    public Collection<Long> listVideoIdByLabes(Collection<String> labelNames) {
+        final ArrayList<String> labelKeys = new ArrayList<>();
+        for (String labelName : labelNames) {
+            labelKeys.add(RedisConstant.SYSTEM_STOCK + labelName);
+        }
+        Set<Long> videoIds = new HashSet<>();
+        final List<Object> list = redisCacheUtil.sRandom(labelKeys);
+        if (!ObjectUtils.isEmpty(list)){
+            videoIds = list.stream().filter(id ->!ObjectUtils.isEmpty(id)).map(id -> Long.valueOf(id.toString())).collect(Collectors.toSet());
+        }
+        return videoIds;
+    }
+
     // 初始化概率数组 -> 存储的是标签 : [游戏，游戏，宠物，花朵]
     public  String [] initProbabilityArray(Map<Object,Object> modelMap){
         Map<String,Integer> probabilityMap = new HashMap<>();
